@@ -1,0 +1,1649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>D.U.C.K. - Digital Unique Companion Kernel</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Tahoma&display=swap');
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      margin: 0;
+      font-family: Tahoma, Arial, sans-serif;
+      background: #3a6ea5;
+      color: #000;
+      overflow: hidden;
+      height: 100vh;
+      user-select: none;
+      cursor: auto;
+    }
+    
+    .desktop {
+      position: relative;
+      height: 100vh;
+      background: linear-gradient(to bottom, #3a6ea5 0%, #1e4788 100%);
+      animation: desktopGlow 20s ease-in-out infinite;
+    }
+    
+    @keyframes desktopGlow {
+      0%, 100% { filter: brightness(1); }
+      50% { filter: brightness(1.1); }
+    }
+    
+    /* Desktop Icons */
+    .desktop-icon {
+      position: absolute;
+      width: 80px;
+      padding: 4px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.1s;
+    }
+    
+    .desktop-icon:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 3px;
+    }
+    
+    .desktop-icon:active {
+      transform: scale(0.95);
+    }
+    
+    .icon-image {
+      width: 48px;
+      height: 48px;
+      margin: 0 auto 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      filter: drop-shadow(1px 1px 2px rgba(0,0,0,0.5));
+    }
+    
+    .icon-label {
+      font-size: 11px;
+      color: #fff;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+      line-height: 1.2;
+      word-wrap: break-word;
+    }
+    
+    /* Window Styles */
+    .window {
+      position: fixed;
+      background: #ece9d8;
+      border: 3px solid;
+      border-color: #fff #87875d #87875d #fff;
+      box-shadow: inset -1px -1px #cbc7b8, inset 1px 1px #ffffff, 2px 2px 5px rgba(0,0,0,0.3);
+      display: none;
+      z-index: 1000;
+      min-width: 250px;
+    }
+    
+    .window.active {
+      display: block;
+      animation: windowOpen 0.2s ease-out;
+    }
+    
+    @keyframes windowOpen {
+      from {
+        transform: scale(0.9);
+        opacity: 0;
+      }
+      to {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+    
+    .window-header {
+      background: linear-gradient(to right, #245ddb 0%, #3c7fe5 50%, #245ddb 100%);
+      padding: 2px 3px 3px 3px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: move;
+    }
+    
+    .window-title {
+      color: #fff;
+      font-size: 11px;
+      font-weight: bold;
+      text-shadow: 1px 1px 0 rgba(0,0,0,0.5);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      white-space: nowrap;
+    }
+    
+    .title-icon {
+      width: 16px;
+      height: 16px;
+    }
+    
+    .window-controls {
+      display: flex;
+      gap: 2px;
+    }
+    
+    .window-button {
+      width: 21px;
+      height: 21px;
+      border: 2px solid;
+      border-color: #fff #87875d #87875d #fff;
+      background: #ece9d8;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: Marlett, sans-serif;
+      font-size: 12px;
+      padding: 0;
+    }
+    
+    .window-button:hover {
+      background: #ddd4b8;
+    }
+    
+    .window-button:active {
+      border-color: #87875d #fff #fff #87875d;
+      padding-left: 1px;
+      padding-top: 1px;
+    }
+    
+    .window.minimized {
+      display: none;
+    }
+    
+    .window-content {
+      padding: 8px;
+      overflow-y: auto;
+      max-height: calc(100vh - 120px);
+    }
+    
+    /* Main App Window */
+    #mainWindow {
+      width: 500px;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+    
+    /* Form Styles */
+    .input-group {
+      margin-bottom: 12px;
+    }
+    
+    .input-group label {
+      display: block;
+      font-size: 11px;
+      margin-bottom: 4px;
+      font-weight: bold;
+    }
+    
+    .text-input {
+      width: 100%;
+      padding: 3px 4px;
+      border: 2px solid;
+      border-color: #87875d #fff #fff #87875d;
+      background: #fff;
+      font-family: Tahoma, Arial, sans-serif;
+      font-size: 11px;
+    }
+    
+    .text-input:focus {
+      outline: 1px dotted #000;
+      outline-offset: -3px;
+    }
+    
+    /* Button Styles */
+    .button {
+      padding: 5px 14px;
+      border: 2px solid;
+      border-color: #fff #87875d #87875d #fff;
+      background: #ece9d8;
+      font-family: Tahoma, Arial, sans-serif;
+      font-size: 11px;
+      cursor: pointer;
+      min-width: 75px;
+    }
+    
+    .button:hover {
+      background: #ddd4b8;
+    }
+    
+    .button:active {
+      border-color: #87875d #fff #fff #87875d;
+      padding-left: 15px;
+      padding-top: 6px;
+    }
+    
+    .button:disabled {
+      color: #8b8b8b;
+      cursor: default;
+      text-shadow: 1px 1px 0 #fff;
+    }
+    
+    .button:disabled:active {
+      border-color: #fff #87875d #87875d #fff;
+      padding-left: 14px;
+      padding-top: 5px;
+    }
+    
+    /* Progress Bar */
+    .progress-container {
+      height: 20px;
+      border: 2px solid;
+      border-color: #87875d #fff #fff #87875d;
+      background: #fff;
+      padding: 2px;
+      margin: 8px 0;
+    }
+    
+    .progress-bar {
+      height: 100%;
+      background-image: repeating-linear-gradient(
+        90deg,
+        #245ddb,
+        #245ddb 8px,
+        #3c7fe5 8px,
+        #3c7fe5 16px
+      );
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+    
+    /* Status Text */
+    .status-text {
+      font-size: 11px;
+      margin: 8px 0;
+      padding: 4px;
+      background: #fff;
+      border: 1px solid #87875d;
+      min-height: 18px;
+      color: #245ddb;
+      font-style: italic;
+    }
+    
+    .error-text {
+      color: #ff0000;
+      font-style: normal;
+      font-weight: bold;
+    }
+    
+    /* Duck Display */
+    .duck-container {
+      background: #fff;
+      border: 2px solid;
+      border-color: #87875d #fff #fff #87875d;
+      padding: 8px;
+      margin-top: 12px;
+      display: none;
+    }
+    
+    .duck-viewer {
+      width: 100%;
+      height: 300px;
+      margin: 0 auto 12px;
+      border: 1px solid #87875d;
+      background: linear-gradient(to bottom, #e3f4ff 0%, #b3d9ff 100%);
+      position: relative;
+      overflow: hidden;
+      cursor: grab;
+    }
+     .duck-viewer:active {
+      cursor: grabbing;
+    }
+    
+    #duckCanvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+    
+    .duck-info {
+      border: 1px solid #87875d;
+      padding: 8px;
+      margin-top: 8px;
+      background: #f9f7ed;
+    }
+    
+    .duck-name {
+      font-size: 14px;
+      font-weight: bold;
+      color: #245ddb;
+      text-align: center;
+      margin-bottom: 8px;
+    }
+    
+    .duck-stats {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 4px;
+      font-size: 11px;
+    }
+    
+    .stat-row {
+      display: grid;
+      grid-template-columns: 100px 1fr;
+      padding: 2px 0;
+      border-bottom: 1px dotted #ccc;
+    }
+    
+    .stat-label {
+      font-weight: bold;
+      color: #87875d;
+    }
+    
+    /* Rarity Styles */
+    .rarity-common { color: #808080; }
+    .rarity-uncommon { color: #1eff00; text-shadow: 0 0 2px #000; }
+    .rarity-rare { color: #0080ff; text-shadow: 0 0 2px #000; }
+    .rarity-epic { color: #a335ee; text-shadow: 0 0 2px #000; }
+    .rarity-legendary { color: #ff8000; text-shadow: 0 0 2px #000; }
+    .rarity-mythic { 
+      background: linear-gradient(45deg, #ff0080, #00ff80, #0080ff, #ff0080);
+      background-size: 400% 400%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: mythicGlow 3s ease infinite;
+    }
+    
+    @keyframes mythicGlow {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    
+    /* Share Buttons */
+    .share-buttons {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+      justify-content: center;
+    }
+    
+    /* Taskbar */
+    .taskbar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 30px;
+      background: #ece9d8;
+      border-top: 2px solid #fff;
+      display: flex;
+      align-items: center;
+      padding: 0 2px;
+      z-index: 9999;
+      box-shadow: 0 -1px 3px rgba(0,0,0,0.2);
+    }
+    
+    .start-button {
+      height: 24px;
+      padding: 0 8px;
+      border: 2px solid;
+      border-color: #fff #87875d #87875d #fff;
+      background: #ece9d8;
+      font-size: 11px;
+      font-weight: bold;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    
+    .start-button:hover {
+      background: #ddd4b8;
+    }
+    
+    .start-button:active {
+      border-color: #87875d #fff #fff #87875d;
+    }
+    
+    .windows-logo {
+      width: 16px;
+      height: 14px;
+      background: linear-gradient(45deg, #ff0000 25%, #00ff00 25%, #00ff00 50%, #0000ff 50%, #0000ff 75%, #ffff00 75%);
+      border: 1px solid #000;
+    }
+    
+    .taskbar-clock {
+      margin-left: auto;
+      padding: 0 8px;
+      font-size: 11px;
+      border: 1px solid;
+      border-color: #87875d #fff #fff #87875d;
+      height: 22px;
+      display: flex;
+      align-items: center;
+    }
+    
+    /* Notification Area */
+    .notification {
+      position: fixed;
+      bottom: 40px;
+      right: 10px;
+      background: #ffffcc;
+      border: 1px solid #000;
+      padding: 8px;
+      font-size: 11px;
+      box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+      display: none;
+      max-width: 200px;
+      z-index: 10000;
+      animation: notificationPop 0.3s ease-out;
+    }
+    
+    @keyframes notificationPop {
+      from {
+        transform: scale(0.8) translateY(20px);
+        opacity: 0;
+      }
+      to {
+        transform: scale(1) translateY(0);
+        opacity: 1;
+      }
+    }
+    
+    .notification-title {
+      font-weight: bold;
+      margin-bottom: 4px;
+    }
+    
+    /* Help/About Windows */
+    #helpWindow, #aboutWindow {
+      top: 100px;
+      left: 150px;
+    }
+    
+    .about-content {
+      text-align: center;
+      padding: 20px;
+    }
+    
+    .about-logo {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 12px;
+      background: #ffd700;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+    }
+    
+    .warning-text {
+      color: #ff0000;
+      font-weight: bold;
+      font-size: 10px;
+      margin-top: 4px;
+      text-align: center;
+      animation: blink 1s ease-in-out infinite;
+    }
+    
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .start-menu {
+      font-family: Tahoma, Arial, sans-serif;
+      font-size: 12px;
+      border-radius: 3px;
+      overflow: hidden;
+      animation: menuPop 0.15s ease;
+    }
+    .start-menu-item {
+      padding: 8px 16px;
+      cursor: pointer;
+      border-bottom: 1px solid #e0dcc7;
+      transition: background 0.15s;
+      user-select: none;
+    }
+    .start-menu-item:last-child {
+      border-bottom: none;
+    }
+    .start-menu-item:hover:not([style*='color:#aaa']) {
+      background: #d6cfa7;
+    }
+    @keyframes menuPop {
+      from { transform: scale(0.95); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .taskbar-items {
+      display: flex;
+      gap: 2px;
+      margin-left: 4px;
+      height: 100%;
+      align-items: center;
+      overflow: hidden;
+    }
+
+    .taskbar-item {
+        height: 24px;
+        padding: 0 8px;
+        border: 2px solid;
+        border-color: #fff #87875d #87875d #fff;
+        background: #ece9d8;
+        font-size: 11px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        max-width: 150px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    
+    .taskbar-item.active {
+       border-color: #87875d #fff #fff #87875d;
+       background: #d6cfa7;
+    }
+
+    .gallery-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        gap: 12px;
+        padding: 8px;
+    }
+    .gallery-item {
+        border: 2px solid;
+        border-color: #fff #87875d #87875d #fff;
+        background: #f9f7ed;
+        padding: 8px;
+        text-align: center;
+        cursor: pointer;
+        transition: background 0.15s;
+    }
+    .gallery-item:hover {
+        background: #d6cfa7;
+    }
+    .gallery-item-name {
+        font-size: 11px;
+        font-weight: bold;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        margin-bottom: 4px;
+    }
+    .gallery-item-rarity {
+        font-size: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="desktop">
+    <!-- Desktop Icons -->
+    <div class="desktop-icon" style="top: 20px; left: 20px;" ondblclick="openMainWindow()">
+      <div class="icon-image">
+        <svg width="48" height="48" viewBox="0 0 48 48">
+          <ellipse cx="24" cy="32" rx="16" ry="12" fill="#ffd700" stroke="#ff8c00" stroke-width="2"/>
+          <circle cx="24" cy="20" r="12" fill="#ffd700" stroke="#ff8c00" stroke-width="2"/>
+          <circle cx="19" cy="18" r="2" fill="#000"/>
+          <circle cx="29" cy="18" r="2" fill="#000"/>
+          <path d="M 16 24 Q 24 28 32 24" fill="#ff6600" stroke="#ff4500" stroke-width="1"/>
+        </svg>
+      </div>
+      <div class="icon-label">DUCK.SYS</div>
+    </div>
+    
+    <div class="desktop-icon" style="top: 110px; left: 20px;" ondblclick="openHelpWindow()">
+      <div class="icon-image">
+        <svg width="48" height="48" viewBox="0 0 48 48">
+          <rect x="8" y="8" width="32" height="32" rx="2" fill="#fff" stroke="#245ddb" stroke-width="2"/>
+          <text x="24" y="30" text-anchor="middle" font-size="24" font-weight="bold" fill="#245ddb">?</text>
+        </svg>
+      </div>
+      <div class="icon-label">Help</div>
+    </div>
+    
+    <div class="desktop-icon" style="top: 200px; left: 20px;" ondblclick="openAboutWindow()">
+      <div class="icon-image">
+        <svg width="48" height="48" viewBox="0 0 48 48">
+          <circle cx="24" cy="24" r="20" fill="#245ddb" stroke="#fff" stroke-width="2"/>
+          <text x="24" y="30" text-anchor="middle" font-size="20" font-weight="bold" fill="#fff">i</text>
+        </svg>
+      </div>
+      <div class="icon-label">About</div>
+    </div>
+    
+    <div class="desktop-icon" style="top: 290px; left: 20px;" ondblclick="window.open('https://x.com/Ducklabsxyz', '_blank')">
+      <div class="icon-image">
+        <svg width="48" height="48" viewBox="0 0 48 48">
+          <rect x="8" y="8" width="32" height="32" rx="4" fill="#000" stroke="#fff" stroke-width="2"/>
+          <path d="M 12 12 L 36 36 M 36 12 L 12 36" stroke="#fff" stroke-width="3"/>
+        </svg>
+      </div>
+      <div class="icon-label">X.com</div>
+    </div>
+
+    <div class="desktop-icon" style="top: 380px; left: 20px;" ondblclick="openGalleryWindow()">
+      <div class="icon-image">
+        <svg width="48" height="48" viewBox="0 0 48 48">
+            <path d="M40,12H24l-4-4H8c-2.2,0-4,1.8-4,4v24c0,2.2,1.8,4,4,4h32c2.2,0,4-1.8,4-4V16C44,13.8,42.2,12,40,12z" fill="#FFC107"/>
+            <ellipse cx="28" cy="29" rx="8" ry="6" fill="#ffd700" stroke="#ff8c00" stroke-width="1"/>
+            <circle cx="28" cy="23" r="6" fill="#ffd700" stroke="#ff8c00" stroke-width="1"/>
+            <circle cx="26" cy="22" r="1" fill="#000"/>
+            <circle cx="30" cy="22" r="1" fill="#000"/>
+        </svg>
+      </div>
+      <div class="icon-label">My Ducks</div>
+    </div>
+
+    <!-- Main Window -->
+    <div class="window" id="mainWindow">
+      <div class="window-header" onmousedown="startDrag(event, 'mainWindow')">
+        <div class="window-title">
+          <img src="data:image/svg+xml,%3Csvg width='16' height='16' viewBox='0 0 16 16' xmlns='http://www.w3.org/2000/svg'%3E%3Cellipse cx='8' cy='10' rx='5' ry='4' fill='%23ffd700'/%3E%3Ccircle cx='8' cy='6' r='4' fill='%23ffd700'/%3E%3C/svg%3E" class="title-icon">
+          D.U.C.K. System
+        </div>
+        <div class="window-controls">
+          <button class="window-button" onclick="minimizeWindow('mainWindow')">_</button>
+          <button class="window-button" onclick="closeWindow('mainWindow')">✕</button>
+        </div>
+      </div>
+      <div class="window-content">
+        <div style="background: #fff; border: 1px solid #87875d; padding: 8px; margin-bottom: 12px;">
+          <strong>Digital Unique Companion Kernel</strong><br>
+          <small>⚠️ WARNING: Each user is allocated ONE duck kernel. Choose wisely!</small>
+        </div>
+        
+        <div class="input-group">
+          <label for="handleInput">Initialize Duck for Handle:</label>
+          <input type="text" id="handleInput" class="text-input" placeholder="Enter Twitter/X handle (no @)" maxlength="15">
+        </div>
+        
+        <div style="text-align: center; margin: 12px 0;">
+          <button class="button" id="generateBtn" onclick="generateDuck()">
+            Initialize D.U.C.K.
+          </button>
+        </div>
+        
+        <div class="progress-container">
+          <div class="progress-bar" id="progressBar"></div>
+        </div>
+        
+        <div class="status-text" id="statusText">Awaiting initialization...</div>
+        
+        <div class="duck-container" id="duckContainer">
+          <div class="duck-viewer" id="duckViewer">
+            <canvas id="duckCanvas"></canvas>
+          </div>
+          <div class="duck-info" id="duckInfo"></div>
+          <div class="share-buttons">
+            <button class="button" onclick="shareDuck()">Share on X</button>
+            <button class="button" onclick="copyDuckData()">Copy Data</button>
+            <button class="button" onclick="downloadDuckImage()">Save .PNG</button>
+            <button class="button" onclick="shareDuckCard()">Share Card</button>
+            <button class="button" onclick="triggerQuack()">Quack</button>
+          </div>
+        </div>
+        
+        <div class="warning-text" id="warningText" style="display: none;">
+          ⚠️ KERNEL ALREADY ALLOCATED - NO REGENERATION POSSIBLE ⚠️
+        </div>
+      </div>
+    </div>
+
+    <!-- My Ducks Gallery Window -->
+    <div class="window" id="galleryWindow" style="width: 450px; height: 350px; top: 120px; left: 200px;">
+      <div class="window-header" onmousedown="startDrag(event, 'galleryWindow')">
+        <div class="window-title">
+          <img src="data:image/svg+xml,%3Csvg width='16' height='16' viewBox='0 0 48 48' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M40,12H24l-4-4H8c-2.2,0-4,1.8-4,4v24c0,2.2,1.8,4,4,4h32c2.2,0,4-1.8,4-4V16C44,13.8,42.2,12,40,12z' fill='%23FFC107'/%3E%3Cellipse cx='28' cy='29' rx='8' ry='6' fill='%23ffd700' stroke='%23ff8c00' stroke-width='1.5'/%3E%3Ccircle cx='28' cy='23' r='6' fill='%23ffd700' stroke='%23ff8c00' stroke-width='1.5'/%3E%3C/svg%3E" class="title-icon">
+          My Ducks
+        </div>
+        <div class="window-controls">
+          <button class="window-button" onclick="minimizeWindow('galleryWindow')">_</button>
+          <button class="window-button" onclick="closeWindow('galleryWindow')">✕</button>
+        </div>
+      </div>
+      <div class="window-content" id="galleryContent" style="max-height: 300px;">
+        <!-- Duck items will be injected here -->
+      </div>
+    </div>
+
+    <!-- Help Window -->
+    <div class="window" id="helpWindow">
+      <div class="window-header" onmousedown="startDrag(event, 'helpWindow')">
+        <div class="window-title">
+          <img src="data:image/svg+xml,%3Csvg width='16' height='16' viewBox='0 0 16 16' xmlns='http://www.w3.org/2000/svg'%3E%3Crect x='2' y='2' width='12' height='12' fill='%23fff' stroke='%23245ddb'/%3E%3Ctext x='8' y='11' text-anchor='middle' font-size='10' fill='%23245ddb'%3E?%3C/text%3E%3C/svg%3E" class="title-icon">
+          D.U.C.K. Help
+        </div>
+        <div class="window-controls">
+          <button class="window-button" onclick="minimizeWindow('helpWindow')">_</button>
+          <button class="window-button" onclick="closeWindow('helpWindow')">✕</button>
+        </div>
+      </div>
+      <div class="window-content">
+        <h3>D.U.C.K. System Manual</h3>
+        <p><strong>What is D.U.C.K.?</strong><br>
+        Digital Unique Companion Kernel - A revolutionary debugging companion system.</p>
+        
+        <p><strong>How to Use:</strong><br>
+        1. Open DUCK.SYS from the desktop.<br>
+        2. Enter any Twitter/X handle.<br>
+        3. Click "Initialize D.U.C.K."<br>
+        4. Your unique duck will be generated based on the handle.<br>
+        5. <span style="color: red;">WARNING: One duck per handle FOREVER!</span></p>
+        
+        <p><strong>New Features!</strong><br>
+        • New Body Shapes: Classic, Mallard, Pixel!<br>
+        • New accessories and special traits!</p>
+
+        <p><strong>Duck Rarity Tiers:</strong><br>
+        • Common (Gray) - 40%<br>
+        • Uncommon (Green) - 30%<br>
+        • Rare (Blue) - 15%<br>
+        • Epic (Purple) - 10%<br>
+        • Legendary (Orange) - 4.5%<br>
+        • Mythic (Rainbow) - 0.5%</p>
+      </div>
+    </div>
+
+    <!-- About Window -->
+    <div class="window" id="aboutWindow">
+      <div class="window-header" onmousedown="startDrag(event, 'aboutWindow')">
+        <div class="window-title">
+          <img src="data:image/svg+xml,%3Csvg width='16' height='16' viewBox='0 0 16 16' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='8' cy='8' r='6' fill='%23245ddb'/%3E%3Ctext x='8' y='11' text-anchor='middle' font-size='10' fill='%23fff'%3Ei%3C/text%3E%3C/svg%3E" class="title-icon">
+          About D.U.C.K.
+        </div>
+        <div class="window-controls">
+          <button class="window-button" onclick="minimizeWindow('aboutWindow')">_</button>
+          <button class="window-button" onclick="closeWindow('aboutWindow')">✕</button>
+        </div>
+      </div>
+      <div class="window-content">
+        <div class="about-content">
+          <div class="about-logo">🦆</div>
+          <h3>D.U.C.K. System</h3>
+          <p>Digital Unique Companion Kernel</p>
+          <p style="font-size: 10px; color: #666;">
+            Licensed to: UNREGISTERED<br>
+            Serial: DUCK-XXXX-XXXX-XXXX
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Taskbar -->
+  <div class="taskbar">
+    <button class="start-button" id="startButton">
+      <div class="windows-logo"></div>
+      Start
+    </button>
+    <div class="taskbar-items" id="taskbarItems"></div>
+    <div class="taskbar-clock" id="clock">12:00 PM</div>
+  </div>
+
+  <!-- Start Menu -->
+  <div class="start-menu" id="startMenu" style="display:none; position:fixed; left:2px; bottom:32px; min-width:160px; background:#ece9d8; border:2px solid #fff; box-shadow:2px 2px 8px rgba(0,0,0,0.2); z-index:10001;">
+    <div class="start-menu-item" onclick="openMainWindow(); hideStartMenu();">🦆 DUCK.SYS</div>
+    <div class="start-menu-item" onclick="openGalleryWindow(); hideStartMenu();">🖼️ My Ducks</div>
+    <div class="start-menu-item" onclick="openHelpWindow(); hideStartMenu();">❓ Help</div>
+    <div class="start-menu-item" onclick="openAboutWindow(); hideStartMenu();">ℹ️ About</div>
+    <div class="start-menu-item" style="color:#aaa; cursor:default;">⚙️ Settings (soon)</div>
+  </div>
+
+  <!-- Notification -->
+  <div class="notification" id="notification">
+    <div class="notification-title">D.U.C.K. System</div>
+    <div id="notificationText">Ready</div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script>
+    // --- GLOBAL STATE & CONFIG ---
+    let currentDuckData = null;
+    const duckRegistry = JSON.parse(localStorage.getItem('duckRegistry') || '{}'); // Store generated ducks by handle
+
+    // Three.js variables
+    let scene, camera, renderer, duckGroup;
+    let animationId;
+    let isDragging = false;
+    let previousMousePosition = { x: 0, y: 0 };
+    
+    // Window management
+    let zCounter = 1001;
+    let duckIsHopping = false;
+    let hopStartTime = 0;
+
+
+    // --- UI ELEMENT REFERENCES ---
+    const ui = {
+        mainWindow: document.getElementById('mainWindow'),
+        helpWindow: document.getElementById('helpWindow'),
+        aboutWindow: document.getElementById('aboutWindow'),
+        handleInput: document.getElementById('handleInput'),
+        generateBtn: document.getElementById('generateBtn'),
+        progressBar: document.getElementById('progressBar'),
+        statusText: document.getElementById('statusText'),
+        duckContainer: document.getElementById('duckContainer'),
+        duckInfo: document.getElementById('duckInfo'),
+        duckCanvas: document.getElementById('duckCanvas'),
+        duckViewer: document.getElementById('duckViewer'),
+        warningText: document.getElementById('warningText'),
+        clock: document.getElementById('clock'),
+        notification: document.getElementById('notification'),
+        notificationText: document.getElementById('notificationText'),
+        taskbarItems: document.getElementById('taskbarItems'),
+        galleryWindow: document.getElementById('galleryWindow'),
+        galleryContent: document.getElementById('galleryContent'),
+    };
+    
+    // --- SOUNDS ---
+    const sounds = {
+        click: new Audio("data:audio/wav;base64,UklGRjIAAABXQVZFZm10IBIAAAABAAEAQB8AAEAfAAABAAgAZGF0YQQAAAAA//8CAP//"),
+        play: function(soundName) {
+            const sound = this[soundName];
+            if (sound) {
+                sound.currentTime = 0;
+                sound.play().catch(e => { /* Autoplay may be blocked, ignore */ });
+            }
+        }
+    };
+    
+    // --- DUCK ATTRIBUTES (v2.1) ---
+    const duckAttributes = {
+        rarities: [
+            { name: 'Common', chance: 0.40, color: 0x9E9E9E },
+            { name: 'Uncommon', chance: 0.30, color: 0x4CAF50 },
+            { name: 'Rare', chance: 0.15, color: 0x2196F3 },
+            { name: 'Epic', chance: 0.10, color: 0x9C27B0 },
+            { name: 'Legendary', chance: 0.045, color: 0xFF9800 },
+            { name: 'Mythic', chance: 0.005, color: 'rainbow' }
+        ],
+        bodyShapes: ["Classic", "Mallard", "Pixel"],
+        accessories: ["None", "Top Hat", "Wizard Hat", "Crown", "Headphones", "Sunglasses", "Bowtie", "Monocle", "Halo", "Devil Horns", "Jetpack"],
+        personalities: ["Debugger", "Helper", "Listener", "Advisor", "Companion", "Guardian", "Scholar", "Sage", "Oracle", "Mentor"],
+        specialTraits: ["None", "Glowing Eyes", "Sparkles", "Floating", "Code Aura", "Glitching", "Stealth"]
+    };
+
+
+    // --- CORE LOGIC ---
+
+    /**
+     * Main function to generate a duck based on user input.
+     */
+    async function generateDuck() {
+        const handle = ui.handleInput.value.trim().toLowerCase().replace(/[^a-z0-9_]/g, '');
+        if (!handle) {
+            showError("Please enter a valid handle.");
+            return;
+        }
+
+        if (duckRegistry[handle]) {
+            showError(`Duck for '${handle}' already exists.`);
+            displayDuck(duckRegistry[handle]);
+            return;
+        }
+
+        ui.generateBtn.disabled = true;
+        ui.handleInput.disabled = true;
+        ui.duckContainer.style.display = 'none';
+
+        const steps = [
+            { progress: 10, text: "Connecting to D.U.C.K. mainframe..." },
+            { progress: 25, text: "Hashing handle into unique identifier..." },
+            { progress: 40, text: `Allocating kernel for @${handle}...` },
+            { progress: 50, text: "Determining body shape and rarity..." },
+            { progress: 70, text: "Assigning random accessories and traits..." },
+            { progress: 85, text: "Fabricating 3D duck model..." },
+            { progress: 95, text: "Finalizing companion parameters..." },
+            { progress: 100, text: "Initialization complete!" }
+        ];
+
+        for (const step of steps) {
+            await updateProgress(step.progress, step.text);
+        }
+
+        const seed = simpleHash(handle);
+        const duckData = createDuckData(handle, seed);
+        duckRegistry[handle] = duckData;
+        localStorage.setItem('duckRegistry', JSON.stringify(duckRegistry));
+        currentDuckData = duckData;
+
+        displayDuck(duckData);
+        
+        showNotification(`Your D.U.C.K. for @${handle} is ready!`);
+    }
+    
+    /**
+     * Creates a deterministic set of duck properties from a seed.
+     */
+    function createDuckData(handle, seed) {
+        let i = 0;
+        const seededRandom = () => {
+            const x = Math.sin(seed + i++) * 10000;
+            return x - Math.floor(x);
+        };
+
+        let rarityRoll = seededRandom();
+        let cumulativeChance = 0;
+        let rarity = duckAttributes.rarities[0];
+        for (const r of duckAttributes.rarities) {
+            cumulativeChance += r.chance;
+            if (rarityRoll < cumulativeChance) {
+                rarity = r;
+                break;
+            }
+        }
+        
+        const hasAccessory = seededRandom() > 0.3;
+        const hasSpecialTrait = rarityRoll > 0.9;
+        
+        let bodyShape = duckAttributes.bodyShapes[Math.floor(seededRandom() * duckAttributes.bodyShapes.length)];
+        let specialTrait = hasSpecialTrait ? duckAttributes.specialTraits[Math.floor(seededRandom() * duckAttributes.specialTraits.length)] : 'None';
+        
+        // Let's make Pixel body shape a bit rarer
+        if (bodyShape === "Pixel" && seededRandom() > 0.2) {
+            bodyShape = "Classic"; 
+        }
+
+        return {
+            handle: handle,
+            name: `${handle}'s Debug Duck`,
+            seed: seed,
+            rarity: rarity,
+            bodyShape: bodyShape,
+            accessory: hasAccessory ? duckAttributes.accessories[Math.floor(seededRandom() * duckAttributes.accessories.length)] : 'None',
+            personality: duckAttributes.personalities[Math.floor(seededRandom() * duckAttributes.personalities.length)],
+            specialTrait: specialTrait,
+        };
+    }
+    
+    /**
+     * Displays the generated duck's info and 3D model.
+     */
+    function displayDuck(duckData) {
+        ui.duckContainer.style.display = 'block';
+
+        const rarityClass = `rarity-${duckData.rarity.name.toLowerCase()}`;
+        ui.duckInfo.innerHTML = `
+            <div class="duck-name">${duckData.name}</div>
+            <div class="duck-stats">
+                <div class="stat-row">
+                    <span class="stat-label">Rarity:</span>
+                    <span class="stat-value ${rarityClass}">${duckData.rarity.name}</span>
+                </div>
+                 <div class="stat-row">
+                    <span class="stat-label">Body Shape:</span>
+                    <span class="stat-value">${duckData.bodyShape}</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Accessory:</span>
+                    <span class="stat-value">${duckData.accessory}</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Personality:</span>
+                    <span class="stat-value">${duckData.personality}</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Special Trait:</span>
+                    <span class="stat-value">${duckData.specialTrait}</span>
+                </div>
+                 <div class="stat-row">
+                    <span class="stat-label">Seed:</span>
+                    <span class="stat-value">${duckData.seed}</span>
+                </div>
+            </div>
+        `;
+
+        initThreeJS();
+        createDuckMesh(duckData);
+        animate();
+    }
+
+
+    // --- THREE.JS 3D RENDERING ---
+
+    function initThreeJS() {
+        const container = ui.duckCanvas.parentElement;
+        if (!container) return;
+
+        if (renderer) {
+            renderer.dispose();
+            if (animationId) cancelAnimationFrame(animationId);
+        }
+
+        scene = new THREE.Scene();
+        scene.background = new THREE.Color(0xb3d9ff);
+
+        camera = new THREE.PerspectiveCamera(50, container.clientWidth / container.clientHeight, 0.1, 1000);
+        camera.position.set(0, 1, 8); // Zoomed out slightly
+        camera.lookAt(0, 0, 0);
+
+        renderer = new THREE.WebGLRenderer({ canvas: ui.duckCanvas, antialias: true, preserveDrawingBuffer: true });
+        renderer.setSize(container.clientWidth, container.clientHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+        scene.add(ambientLight);
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.9);
+        directionalLight.position.set(5, 10, 7.5);
+        scene.add(directionalLight);
+    }
+    
+    function createDuckMesh(data) {
+        if (duckGroup) scene.remove(duckGroup);
+        duckGroup = new THREE.Group();
+
+        let duckMaterial;
+        if (data.rarity.color === 'rainbow') {
+            duckMaterial = new THREE.MeshNormalMaterial();
+        } else {
+            duckMaterial = new THREE.MeshStandardMaterial({ color: data.rarity.color, roughness: 0.4, metalness: 0.1 });
+        }
+        
+        if (data.specialTrait === 'Stealth' && data.rarity.color !== 'rainbow') {
+            duckMaterial.transparent = true;
+            duckMaterial.opacity = 0.4;
+        }
+
+        const beakMaterial = new THREE.MeshStandardMaterial({ color: 0xFF8C00 });
+
+        // --- BODY SHAPE LOGIC ---
+        switch(data.bodyShape) {
+            case "Pixel":
+                const body_p = new THREE.Mesh(new THREE.BoxGeometry(2.5, 1.5, 2), duckMaterial);
+                const head_p = new THREE.Mesh(new THREE.BoxGeometry(1.5, 1.5, 1.5), duckMaterial);
+                head_p.position.set(0, 1.5, 0);
+                const beak_p = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.5, 1), beakMaterial);
+                beak_p.position.set(0, 1.3, 1.2);
+                duckGroup.add(body_p, head_p, beak_p);
+                break;
+            
+            case "Mallard":
+                const body_m = new THREE.Mesh(new THREE.SphereGeometry(1.5, 32, 16, 0, Math.PI * 2, 0, Math.PI / 1.5), duckMaterial);
+                body_m.scale.z = 1.3;
+                body_m.position.y = -0.5;
+                const head_m = new THREE.Mesh(new THREE.SphereGeometry(0.8, 32, 16), new THREE.MeshStandardMaterial({color: 0x006400}));
+                head_m.position.set(0, 1.1, 0.7);
+                const beak_m = new THREE.Mesh(new THREE.ConeGeometry(0.4, 0.7, 16), beakMaterial);
+                beak_m.position.set(0, 1.1, 1.3);
+                beak_m.rotation.x = Math.PI / 2;
+                duckGroup.add(body_m, head_m, beak_m);
+                break;
+
+            case "Classic":
+            default:
+                const body_c = new THREE.Mesh(new THREE.SphereGeometry(1.5, 32, 16, 0, Math.PI * 2, 0, Math.PI / 1.5), duckMaterial);
+                body_c.position.y = -0.5;
+                const head_c = new THREE.Mesh(new THREE.SphereGeometry(1, 32, 16), duckMaterial);
+                head_c.position.set(0, 1, 0);
+                const beak_c = new THREE.Mesh(new THREE.ConeGeometry(0.5, 1, 16), beakMaterial);
+                beak_c.position.set(0, 1, 1);
+                beak_c.rotation.x = Math.PI / 2;
+                duckGroup.add(body_c, head_c, beak_c);
+                break;
+        }
+
+        // Eyes (common to all non-pixel shapes)
+        if(data.bodyShape !== "Pixel") {
+            const eyeGeometry = new THREE.SphereGeometry(data.bodyShape === 'Mallard' ? 0.16 : 0.15, 12, 8);
+            let eyeMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 });
+
+            if (data.specialTrait === 'Glowing Eyes') {
+                eyeMaterial = new THREE.MeshBasicMaterial({
+                    color: 0xffff00,
+                    emissive: 0xffff00,
+                    emissiveIntensity: 1
+                });
+            }
+
+            let leftEye, rightEye;
+            if (data.bodyShape === 'Mallard') {
+                leftEye = new THREE.Mesh(eyeGeometry, eyeMaterial);
+                leftEye.position.set(-0.32, 1.23, 1.33);
+                rightEye = new THREE.Mesh(eyeGeometry, eyeMaterial);
+                rightEye.position.set(0.32, 1.23, 1.33);
+            } else { // Classic
+                leftEye = new THREE.Mesh(eyeGeometry, eyeMaterial);
+                leftEye.position.set(-0.4, 1.3, 0.8);
+                rightEye = new THREE.Mesh(eyeGeometry, eyeMaterial);
+                rightEye.position.set(0.4, 1.3, 0.8);
+            }
+            leftEye.name = "leftEye";
+            rightEye.name = "rightEye";
+            duckGroup.add(leftEye, rightEye);
+        }
+        
+        // --- SPECIAL TRAIT EFFECTS ---
+        if (data.specialTrait === 'Sparkles') {
+            const particlesGeometry = new THREE.BufferGeometry();
+            const particlesCnt = 150;
+            const posArray = new Float32Array(particlesCnt * 3);
+            for (let i = 0; i < particlesCnt * 3; i++) {
+                posArray[i] = (Math.random() - 0.5) * 5;
+            }
+            particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+            const particlesMaterial = new THREE.PointsMaterial({ size: 0.06, color: 0xFFD700, transparent: true });
+            const sparkleParticles = new THREE.Points(particlesGeometry, particlesMaterial);
+            sparkleParticles.name = 'sparkles';
+            duckGroup.add(sparkleParticles);
+        }
+        
+        if (data.specialTrait === 'Code Aura') {
+            const particlesGeometry = new THREE.BufferGeometry();
+            const particlesCnt = 200;
+            const posArray = new Float32Array(particlesCnt * 3);
+             for (let i = 0; i < particlesCnt * 3; i++) {
+                posArray[i] = (Math.random() - 0.5) * 6;
+            }
+            particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+            const particlesMaterial = new THREE.PointsMaterial({ size: 0.05, color: 0x00ff00, transparent: true });
+            const codeParticles = new THREE.Points(particlesGeometry, particlesMaterial);
+            codeParticles.name = 'codeAura';
+            duckGroup.add(codeParticles);
+        }
+
+        addAccessory(data.accessory, data.bodyShape);
+        scene.add(duckGroup);
+    }
+
+    function addAccessory(accessory, bodyShape) {
+        const existingAccessory = duckGroup.getObjectByName("accessory");
+        if(existingAccessory) duckGroup.remove(existingAccessory);
+
+        let accessoryMesh;
+        const headYOffset = bodyShape === 'Pixel' ? 2.2 : (bodyShape === 'Mallard' ? 1.8 : 2.0);
+
+        switch(accessory) {
+            case "Top Hat":
+                const hatGroup = new THREE.Group();
+                const brim = new THREE.Mesh(new THREE.CylinderGeometry(0.8, 0.8, 0.1, 32), new THREE.MeshStandardMaterial({color: 0x111111}));
+                const top = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.5, 0.8, 32), new THREE.MeshStandardMaterial({color: 0x111111}));
+                top.position.y = 0.45;
+                hatGroup.add(brim, top);
+                accessoryMesh = hatGroup;
+                if (bodyShape === 'Mallard') {
+                    accessoryMesh.position.set(0, 1.1 + 0.45 + 0.2, 0.7);
+                } else if (bodyShape === 'Pixel') {
+                    accessoryMesh.position.set(0, 2.2, 0);
+                } else {
+                    accessoryMesh.position.set(0, 2.0, 0);
+                }
+                break;
+            case "Crown":
+                accessoryMesh = new THREE.Mesh(new THREE.TorusGeometry(0.6, 0.1, 8, 20), new THREE.MeshStandardMaterial({color: 0xFFD700, metalness: 0.8, roughness: 0.3}));
+                if (bodyShape === 'Mallard') {
+                    accessoryMesh.position.set(0, 1.4, 0.7);
+                } else {
+                    accessoryMesh.position.set(0, headYOffset + 0.1, 0);
+                }
+                accessoryMesh.rotation.x = Math.PI / 2;
+                break;
+            case "Halo":
+                 accessoryMesh = new THREE.Mesh(new THREE.TorusGeometry(0.7, 0.05, 16, 100), new THREE.MeshStandardMaterial({color: 0xFFFFE0, emissive: 0xFFFFE0, emissiveIntensity: 1}));
+                 if (bodyShape === 'Mallard') {
+                     accessoryMesh.position.set(0, 1.6, 0.7);
+                 } else {
+                     accessoryMesh.position.set(0, headYOffset + 0.3, 0);
+                 }
+                 accessoryMesh.rotation.x = Math.PI / 2;
+                 break;
+            case "Sunglasses":
+                const glassesGroup = new THREE.Group();
+                const lensMat = new THREE.MeshBasicMaterial({color: 0x111111});
+                const lenseL = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.3, 0.1), lensMat);
+                lenseL.position.x = -0.4;
+                const lenseR = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.3, 0.1), lensMat);
+                lenseR.position.x = 0.4;
+                glassesGroup.add(lenseL, lenseR);
+                accessoryMesh = glassesGroup;
+                if (bodyShape === 'Mallard') {
+                    accessoryMesh.position.set(0, 1.23, 1.33);
+                } else {
+                    accessoryMesh.position.set(0, 1.3, 1);
+                }
+                break;
+            case "Jetpack":
+                 const packGroup = new THREE.Group();
+                 const tankMat = new THREE.MeshStandardMaterial({color: 0xC0C0C0, metalness: 1});
+                 const tankL = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 1, 16), tankMat);
+                 tankL.position.x = -0.5;
+                 const tankR = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 1, 16), tankMat);
+                 tankR.position.x = 0.5;
+                 packGroup.add(tankL, tankR);
+                 accessoryMesh = packGroup;
+                 accessoryMesh.position.set(0, 0, -1.5);
+                 accessoryMesh.rotation.x = Math.PI / 16;
+                 break;
+        }
+
+        if (accessoryMesh) {
+            accessoryMesh.name = "accessory";
+            duckGroup.add(accessoryMesh);
+        }
+    }
+
+    function animate() {
+        animationId = requestAnimationFrame(animate);
+        if (duckGroup && !isDragging) {
+            duckGroup.rotation.y += 0.005;
+        }
+        
+        let baseY = 0;
+        if (currentDuckData && currentDuckData.specialTrait === 'Floating') {
+            baseY = Math.sin(Date.now() * 0.002) * 0.2;
+        }
+
+        if (duckIsHopping) {
+            const elapsed = Date.now() - hopStartTime;
+            if (elapsed > 300) { // 300ms hop duration
+                duckIsHopping = false;
+                if (duckGroup) duckGroup.position.y = baseY;
+            } else {
+                // simple parabolic hop animation
+                const hopProgress = elapsed / 300;
+                const hopHeight = 0.5;
+                if (duckGroup) duckGroup.position.y = baseY + hopHeight * Math.sin(hopProgress * Math.PI);
+            }
+        } else {
+            if (duckGroup) duckGroup.position.y = baseY;
+        }
+        
+        if (currentDuckData && currentDuckData.specialTrait === 'Glowing Eyes') {
+            const leftEye = duckGroup.getObjectByName('leftEye');
+            const rightEye = duckGroup.getObjectByName('rightEye');
+            if (leftEye && rightEye) {
+                const intensity = Math.abs(Math.sin(Date.now() * 0.004)) * 1.5 + 0.8;
+                leftEye.material.emissiveIntensity = intensity;
+                rightEye.material.emissiveIntensity = intensity;
+            }
+        }
+        
+        if (currentDuckData && currentDuckData.specialTrait === 'Sparkles') {
+            const sparkles = duckGroup.getObjectByName('sparkles');
+            if (sparkles) {
+                sparkles.rotation.y += 0.008;
+                sparkles.material.opacity = Math.abs(Math.sin(Date.now() * 0.0015));
+            }
+        }
+        
+         if (currentDuckData && currentDuckData.specialTrait === 'Code Aura') {
+            const codeAura = duckGroup.getObjectByName('codeAura');
+            if (codeAura) {
+                codeAura.rotation.y -= 0.005;
+                codeAura.rotation.x += 0.002;
+                codeAura.material.opacity = Math.abs(Math.sin(Date.now() * 0.002));
+            }
+        }
+
+        if (currentDuckData && currentDuckData.specialTrait === 'Glitching' && Math.random() < 0.1) {
+            const originalX = duckGroup.position.x;
+            duckGroup.position.x += (Math.random() - 0.5) * 0.5;
+            setTimeout(() => { if (duckGroup) duckGroup.position.x = originalX; }, 60);
+        }
+        
+        renderer.render(scene, camera);
+    }
+
+    // --- UI & EVENT HANDLERS ---
+    
+    document.addEventListener('DOMContentLoaded', () => {
+        updateClock();
+        setInterval(updateClock, 1000);
+        openMainWindow();
+        setupDragRotation();
+
+        // Add sound listeners
+        document.querySelectorAll('.button, .window-button, .desktop-icon, .start-button').forEach(el => {
+            el.addEventListener('mousedown', () => sounds.play('click'));
+        });
+
+        // Start menu logic
+        const startButton = document.getElementById('startButton');
+        const startMenu = document.getElementById('startMenu');
+        startButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (startMenu.style.display === 'block') {
+                startMenu.style.display = 'none';
+            } else {
+                startMenu.style.display = 'block';
+            }
+        });
+        document.addEventListener('click', (e) => {
+            if (startMenu.style.display === 'block' && !startMenu.contains(e.target) && e.target !== startButton) {
+                startMenu.style.display = 'none';
+            }
+        });
+    });
+
+    function hideStartMenu() {
+        document.getElementById('startMenu').style.display = 'none';
+    }
+
+    function bringToFront(windowEl) {
+        if (!windowEl) return;
+        windowEl.style.zIndex = zCounter++;
+        // Make associated taskbar item look active
+        document.querySelectorAll('.taskbar-item').forEach(item => item.classList.remove('active'));
+        const taskbarItem = document.querySelector(`.taskbar-item[data-id="${windowEl.id}"]`);
+        if (taskbarItem && !windowEl.classList.contains('minimized')) {
+            taskbarItem.classList.add('active');
+        }
+    }
+
+    function openMainWindow() { 
+        const win = ui.mainWindow;
+        win.classList.add('active'); 
+        win.classList.remove('minimized');
+        bringToFront(win);
+        restoreWindow(win.id);
+        sounds.play('click'); 
+    }
+    function openHelpWindow() { 
+        const win = ui.helpWindow;
+        win.classList.add('active'); 
+        win.classList.remove('minimized');
+        bringToFront(win);
+        restoreWindow(win.id);
+        sounds.play('click'); 
+    }
+    function openAboutWindow() { 
+        const win = ui.aboutWindow;
+        win.classList.add('active'); 
+        win.classList.remove('minimized');
+        bringToFront(win);
+        restoreWindow(win.id);
+        sounds.play('click'); 
+    }
+    function openGalleryWindow() {
+        const win = ui.galleryWindow;
+        if (win.classList.contains('active')) {
+            bringToFront(win);
+            return;
+        }
+        win.classList.add('active'); 
+        win.classList.remove('minimized');
+        bringToFront(win);
+        populateGallery();
+        restoreWindow(win.id);
+        sounds.play('click'); 
+    }
+    function closeWindow(id) { 
+        const windowEl = document.getElementById(id);
+        windowEl.classList.remove('active'); 
+        if (!windowEl.classList.contains('minimized')) {
+           const taskbarItem = document.querySelector(`.taskbar-item[data-id="${id}"]`);
+           if (taskbarItem) taskbarItem.remove();
+        }
+    }
+
+    function minimizeWindow(id) {
+        const windowEl = document.getElementById(id);
+        if (!windowEl || !windowEl.classList.contains('active')) return;
+
+        const title = windowEl.querySelector('.window-title').textContent.trim();
+        if (document.querySelector(`.taskbar-item[data-id="${id}"]`)) return; // Already minimized
+
+        windowEl.classList.add('minimized');
+        
+        const taskbarItem = document.createElement('button');
+        taskbarItem.className = 'taskbar-item';
+        taskbarItem.textContent = title;
+        taskbarItem.dataset.id = id;
+        taskbarItem.onclick = () => restoreWindow(id);
+        
+        ui.taskbarItems.appendChild(taskbarItem);
+        document.querySelectorAll('.taskbar-item').forEach(item => item.classList.remove('active'));
+        sounds.play('click');
+    }
+
+    function restoreWindow(id) {
+        const windowEl = document.getElementById(id);
+        if (!windowEl) return;
+        
+        windowEl.classList.remove('minimized');
+        bringToFront(windowEl);
+        
+        const taskbarItem = document.querySelector(`.taskbar-item[data-id="${id}"]`);
+        if (taskbarItem) {
+            taskbarItem.remove();
+        }
+        sounds.play('click');
+    }
+
+    let windowDragState = { isDragging: false, target: null, offsetX: 0, offsetY: 0 };
+    function startDrag(event, id) {
+        const target = document.getElementById(id);
+        bringToFront(target);
+        windowDragState = {
+            isDragging: true,
+            target: target,
+            offsetX: event.clientX - target.offsetLeft,
+            offsetY: event.clientY - target.offsetTop,
+        };
+        document.addEventListener('mousemove', onWindowDrag);
+        document.addEventListener('mouseup', endWindowDrag);
+    }
+
+    function onWindowDrag(event) {
+        if (!windowDragState.isDragging) return;
+        windowDragState.target.style.left = `${event.clientX - windowDragState.offsetX}px`;
+        windowDragState.target.style.top = `${event.clientY - windowDragState.offsetY}px`;
+    }
+
+    function endWindowDrag() {
+        windowDragState.isDragging = false;
+        document.removeEventListener('mousemove', onWindowDrag);
+        document.removeEventListener('mouseup', endWindowDrag);
+    }
+    
+    // --- Manual Duck Rotation ---
+    function setupDragRotation() {
+        ui.duckViewer.addEventListener('mousedown', e => {
+            isDragging = true;
+            previousMousePosition.x = e.clientX;
+            previousMousePosition.y = e.clientY;
+        });
+        
+        ui.duckViewer.addEventListener('mousemove', e => {
+            if (!isDragging || !duckGroup) return;
+            const deltaX = e.clientX - previousMousePosition.x;
+            duckGroup.rotation.y += deltaX * 0.01;
+            previousMousePosition.x = e.clientX;
+        });
+
+        ui.duckViewer.addEventListener('mouseup', () => { isDragging = false; });
+        ui.duckViewer.addEventListener('mouseleave', () => { isDragging = false; });
+    }
+
+    function updateClock() {
+        ui.clock.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+
+    function showNotification(message) {
+        ui.notificationText.textContent = message;
+        ui.notification.style.display = 'block';
+        setTimeout(() => { ui.notification.style.display = 'none'; }, 4000);
+    }
+
+    function showError(message) {
+        ui.statusText.innerHTML = `<span class="error-text">ERROR: ${message}</span>`;
+    }
+
+    async function updateProgress(progress, text) {
+        ui.progressBar.style.width = `${progress}%`;
+        ui.statusText.textContent = text;
+        return new Promise(resolve => setTimeout(resolve, 250));
+    }
+    
+    function shareDuck() {
+        if (!currentDuckData) return;
+        const text = `I got a ${currentDuckData.rarity.name} ${currentDuckData.bodyShape} duck with a ${currentDuckData.accessory} and the ${currentDuckData.personality} personality. Generate your D.U.C.K.!`;
+        const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
+        window.open(url, '_blank');
+    }
+
+    function copyDuckData() {
+        if (!currentDuckData) return;
+        const dataString = JSON.stringify(currentDuckData, null, 2);
+        navigator.clipboard.writeText(dataString).then(() => {
+            showNotification('Duck data copied to clipboard!');
+        }, () => {
+            showError('Failed to copy data.');
+        });
+    }
+
+    function downloadDuckImage() {
+        if (!renderer) return;
+        const dataURL = renderer.domElement.toDataURL('image/png');
+        const link = document.createElement('a');
+        link.download = `${currentDuckData.handle}_duck.png`;
+        link.href = dataURL;
+        link.click();
+    }
+
+    function shareDuckCard() {
+        if (!currentDuckData || !renderer) return;
+        // Create an off-screen canvas
+        const cardWidth = 600, cardHeight = 400;
+        const cardCanvas = document.createElement('canvas');
+        cardCanvas.width = cardWidth;
+        cardCanvas.height = cardHeight;
+        const ctx = cardCanvas.getContext('2d');
+
+        // Background
+        ctx.fillStyle = '#e3f4ff';
+        ctx.fillRect(0, 0, cardWidth, cardHeight);
+        // Card border
+        ctx.strokeStyle = '#245ddb';
+        ctx.lineWidth = 6;
+        ctx.strokeRect(0, 0, cardWidth, cardHeight);
+
+        // Draw duck image from renderer
+        const duckImg = new Image();
+        duckImg.src = renderer.domElement.toDataURL('image/png');
+        duckImg.onload = function() {
+            // Duck image area
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(160, 180, 120, 0, 2 * Math.PI);
+            ctx.closePath();
+            ctx.clip();
+            ctx.drawImage(duckImg, 40, 60, 240, 240);
+            ctx.restore();
+
+            // Duck name
+            ctx.font = 'bold 24px Tahoma, Arial, sans-serif';
+            ctx.fillStyle = '#245ddb';
+            ctx.textAlign = 'left';
+            ctx.fillText(currentDuckData.name, 300, 100);
+
+            // Stats
+            ctx.font = '16px Tahoma, Arial, sans-serif';
+            ctx.fillStyle = '#222';
+            let y = 140;
+            const statPad = 34;
+            function stat(label, value, color) {
+                ctx.font = 'bold 15px Tahoma, Arial, sans-serif';
+                ctx.fillStyle = '#87875d';
+                ctx.fillText(label + ':', 300, y);
+                ctx.font = '16px Tahoma, Arial, sans-serif';
+                ctx.fillStyle = color || '#222';
+                ctx.fillText(value, 420, y);
+                y += statPad;
+            }
+            // Rarity color
+            let rarityColor = '#808080';
+            switch(currentDuckData.rarity.name) {
+                case 'Uncommon': rarityColor = '#1eff00'; break;
+                case 'Rare': rarityColor = '#0080ff'; break;
+                case 'Epic': rarityColor = '#a335ee'; break;
+                case 'Legendary': rarityColor = '#ff8000'; break;
+                case 'Mythic': rarityColor = '#ff0080'; break;
+            }
+            stat('Rarity', currentDuckData.rarity.name, rarityColor);
+            stat('Body Shape', currentDuckData.bodyShape);
+            stat('Accessory', currentDuckData.accessory);
+            stat('Personality', currentDuckData.personality);
+            stat('Special Trait', currentDuckData.specialTrait);
+            stat('Handle', '@' + currentDuckData.handle);
+
+            // Footer
+            ctx.font = 'italic 13px Tahoma, Arial, sans-serif';
+            ctx.fillStyle = '#245ddb';
+            ctx.textAlign = 'center';
+            ctx.fillText('D.U.C.K. System  |  ducksoft.app', cardWidth/2, cardHeight - 24);
+            ctx.font = '32px serif';
+            ctx.fillText('🦆', 60, cardHeight - 30);
+
+            // Download
+            const link = document.createElement('a');
+            link.download = `${currentDuckData.handle}_duck_card.png`;
+            link.href = cardCanvas.toDataURL('image/png');
+            link.click();
+        };
+    }
+
+    function populateGallery() {
+        ui.galleryContent.innerHTML = ''; // Clear previous content
+        const ducks = Object.values(duckRegistry);
+
+        if (ducks.length === 0) {
+            ui.galleryContent.innerHTML = '<p style="padding: 12px; text-align: center; font-size: 11px;">No ducks generated yet. Go make some!</p>';
+            return;
+        }
+
+        const grid = document.createElement('div');
+        grid.className = 'gallery-grid';
+
+        ducks.sort((a, b) => a.handle.localeCompare(b.handle)).forEach(duckData => {
+            const item = document.createElement('div');
+            item.className = 'gallery-item';
+            item.onclick = () => {
+                openMainWindow();
+                displayDuck(duckData);
+                closeWindow('galleryWindow');
+                sounds.play('click');
+            };
+
+            const name = document.createElement('div');
+            name.className = 'gallery-item-name';
+            name.textContent = `@${duckData.handle}`;
+            name.title = duckData.name;
+
+            const rarity = document.createElement('div');
+            rarity.className = `gallery-item-rarity rarity-${duckData.rarity.name.toLowerCase()}`;
+            rarity.textContent = duckData.rarity.name;
+
+            item.appendChild(name);
+            item.appendChild(rarity);
+            grid.appendChild(item);
+        });
+
+        ui.galleryContent.appendChild(grid);
+    }
+
+    function triggerQuack() {
+        if (!duckGroup || duckIsHopping) return;
+        // sounds.play('quack'); // We can add this back later
+        duckIsHopping = true;
+        hopStartTime = Date.now();
+    }
+
+    // --- UTILITY FUNCTIONS ---
+
+    function simpleHash(str) {
+        let hash = 0;
+        for (let i = 0; i < str.length; i++) {
+            const char = str.charCodeAt(i);
+            hash = (hash << 5) - hash + char;
+            hash |= 0; // Convert to 32bit integer
+        }
+        return hash;
+    }
+
+  </script>
+</body>
+</html>
