@@ -1480,7 +1480,7 @@
     
     function shareDuck() {
         if (!currentDuckData) return;
-        const text = `I got a ${currentDuckData.rarity.name} ${currentDuckData.bodyShape} duck with a ${currentDuckData.accessory} and the ${currentDuckData.personality} personality. Generate your D.U.C.K.!`;
+        const text = `I got a ${currentDuckData.rarity.name} ${currentDuckData.bodyShape} duck with a ${currentDuckData.accessory} and the ${currentDuckData.personality} personality. Generate your D.U.C.K.! www.ducklabs.fun @Ducklabsxyz `;
         const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
         window.open(url, '_blank');
     }
@@ -1574,7 +1574,7 @@
             ctx.font = 'italic 13px Tahoma, Arial, sans-serif';
             ctx.fillStyle = '#245ddb';
             ctx.textAlign = 'center';
-            ctx.fillText('D.U.C.K. System  |  ducksoft.app', cardWidth/2, cardHeight - 24);
+            ctx.fillText('D.U.C.K. System  | ducklabs.fun', cardWidth/2, cardHeight - 24);
             ctx.font = '32px serif';
             ctx.fillText('🦆', 60, cardHeight - 30);
 
