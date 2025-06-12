@@ -615,7 +615,19 @@
       <div class="icon-label">About</div>
     </div>
     
-    <div class="desktop-icon" style="top: 290px; left: 20px;" ondblclick="window.open('https://x.com/Ducklabsxyz', '_blank')">
+    <div class="desktop-icon" style="top: 290px; left: 20px;" ondblclick="openNftWindow()">
+      <div class="icon-image">
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M24 4L4 24L24 44L44 24L24 4Z" stroke="#000000" stroke-width="2" stroke-linejoin="round"/>
+          <path d="M24 4L4 24L24 44L44 24L24 4Z" fill="#A7A7A7"/>
+          <path d="M24 4L4 24L24 44L44 24L24 4Z" stroke="#FFFFFF" stroke-width="2" stroke-linejoin="round" style="transform: translate(2px, 2px);"/>
+          <text x="24" y="30" font-family="Tahoma, sans-serif" font-size="12" fill="#000000" text-anchor="middle">NFT</text>
+        </svg>
+      </div>
+      <div class="icon-label">NFT your Duck</div>
+    </div>
+
+    <div class="desktop-icon" style="top: 380px; left: 20px;" ondblclick="window.open('https://x.com/Ducklabsxyz', '_blank')">
       <div class="icon-image">
         <svg width="48" height="48" viewBox="0 0 48 48">
           <rect x="8" y="8" width="32" height="32" rx="4" fill="#000" stroke="#fff" stroke-width="2"/>
@@ -625,7 +637,7 @@
       <div class="icon-label">X</div>
     </div>
 
-    <div class="desktop-icon" style="top: 380px; left: 20px;" ondblclick="openGalleryWindow()">
+    <div class="desktop-icon" style="top: 470px; left: 20px;" ondblclick="openGalleryWindow()">
       <div class="icon-image">
         <svg width="48" height="48" viewBox="0 0 48 48">
             <path d="M40,12H24l-4-4H8c-2.2,0-4,1.8-4,4v24c0,2.2,1.8,4,4,4h32c2.2,0,4-1.8,4-4V16C44,13.8,42.2,12,40,12z" fill="#FFC107"/>
@@ -790,6 +802,7 @@
     <div class="start-menu-item" onclick="openGalleryWindow(); hideStartMenu();">🖼️ My Pixel Ducks</div>
     <div class="start-menu-item" onclick="openHelpWindow(); hideStartMenu();">❓ Help</div>
     <div class="start-menu-item" onclick="openAboutWindow(); hideStartMenu();">ℹ️ About</div>
+    <div class="start-menu-item" onclick="openNftWindow(); hideStartMenu();">💎 NFT your Duck</div>
     <div class="start-menu-item" style="color:#aaa; cursor:default;">⚙️ Settings (soon)</div>
   </div>
 
@@ -797,6 +810,22 @@
   <div class="notification" id="notification">
     <div class="notification-title">Pixel Ducks System</div>
     <div id="notificationText">Ready</div>
+  </div>
+
+  <!-- NFT Window -->
+  <div id="nftWindow" class="window" style="display:none; width: 300px; height: 150px; top: 200px; left: 250px;">
+    <div class="window-header" onmousedown="startDrag(event, 'nftWindow')">
+        <div class="window-title">
+            💎 NFT your Duck
+        </div>
+        <div class="window-controls">
+            <button class="window-button" onclick="minimizeWindow('nftWindow')">_</button>
+            <button class="window-button" onclick="closeWindow('nftWindow')">✕</button>
+        </div>
+    </div>
+    <div class="window-content" style="text-align: center; padding-top: 30px; font-size: 16px;">
+      Coming soon only for $QUACK holders
+    </div>
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -837,6 +866,7 @@
         taskbarItems: document.getElementById('taskbarItems'),
         galleryWindow: document.getElementById('galleryWindow'),
         galleryContent: document.getElementById('galleryContent'),
+        nftWindow: document.getElementById('nftWindow'),
     };
     
     // --- SOUNDS ---
@@ -1372,7 +1402,8 @@
     }
     function closeWindow(id) { 
         const windowEl = document.getElementById(id);
-        windowEl.classList.remove('active'); 
+        windowEl.classList.remove('active');
+        windowEl.style.display = 'none'; // Ensure window is hidden
         if (!windowEl.classList.contains('minimized')) {
            const taskbarItem = document.querySelector(`.taskbar-item[data-id="${id}"]`);
            if (taskbarItem) taskbarItem.remove();
@@ -1630,6 +1661,21 @@
         // sounds.play('quack'); // We can add this back later
         duckIsHopping = true;
         hopStartTime = Date.now();
+    }
+
+    function openNftWindow() {
+        const win = ui.nftWindow;
+        win.style.display = 'block';
+        win.classList.add('active');
+        win.classList.remove('minimized');
+        bringToFront(win);
+        restoreWindow(win.id);
+        sounds.play('click');
+    }
+
+    function closeNftWindow() {
+        const nftWindow = document.getElementById('nftWindow');
+        nftWindow.style.display = 'none';
     }
 
     // --- UTILITY FUNCTIONS ---
